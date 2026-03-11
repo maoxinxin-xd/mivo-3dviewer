@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Model Viewer</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module"
+    src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer-module.js"></script>
+</head>
+
+<body>
+  <div id="app" class="model-viewer-overlay">
+    <!-- model-viewer -->
+    <model-viewer id="modelViewer" zoom-sensitivity="0.5" ar ar-modes="scene-viewer webxr" camera-controls
+      interaction-prompt="none" style="opacity:0; transition: opacity 0.3s ease; width:100%; height:100%;
+             background: linear-gradient(180deg, #1C1F1F 0%, #525252 100%);
+             transform-origin: top left;">
+    </model-viewer>
+
+    <!-- 加载进度 -->
+    <div id="loadingProgress" class="model-loading-progress hidden">
+      <div class="flex flex-col items-center justify-center">
+        <div class="flex flex-col items-center justify-between">
+          <div class="spinner"></div>
+          <div class="loading-text">
+            模型加载中
+            <span id="progressText" class="process-text">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 左侧面板 -->
+    <div id="leftPanel" class="left-panel pointer-events-none">
+      <div class="left-panel-main">
+        <div class="model-info">
+          <div class="model-info-header" style="display: flex;align-items: center;"><img
+              style="height:32px;display: flex;"
+              src="data:image/png;base64,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" />
+            模型查看器</div>
+          <div class="model-info-divider"></div>
+          <div class="flex items-center justify-between">
+            <div>拓扑</div>
+            <div class="val">三角面</div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>面数</div>
+            <div class="val" id="triangleCount">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧面板 -->
+    <div id="rightPanel" class="right-panel pointer-events-none">
+      <div class="right-panel-main flex flex-col gap-2">
+        <!-- 显示设置 -->
+        <div class="display-settings">
+          <div class="display-settings-title">显示设置</div>
+          <div class="display-settings-content">
+            <div class="display-settings-item">
+              <div class="display-settings-item-title">透视关系</div>
+              <div class="flex items-center justify-between gap-1">
+                <div class="w-1/2 projection-btn is-active" data-projection="perspective">
+                  <img src="assets/icons/perspective.svg" alt="透视" width="18" height="18" />
+                  <span>透视</span>
+                </div>
+                <div class="w-1/2 projection-btn" data-projection="orthographic">
+                  <img src="assets/icons/orthographic.svg" alt="正交" width="18" height="18" />
+                  <span>正交</span>
+                </div>
+              </div>
+            </div>
+            <div class="display-settings-item">
+              <div class="display-settings-item-title">预设角度</div>
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-1">
+                  <div class="w-1/2 projection-btn is-active" data-view="front">
+                    <img src="assets/icons/正视图.svg" alt="前视" width="36" height="36" />
+                  </div>
+                  <div class="w-1/2 projection-btn" data-view="back">
+                    <img src="assets/icons/背视图.svg" alt="后视" width="36" height="36" />
+                  </div>
+                </div>
+                <div class="flex items-center justify-between gap-1">
+                  <div class="w-1/2 projection-btn" data-view="side">
+                    <img src="assets/icons/侧视图.svg" alt="侧视" width="36" height="36" />
+                  </div>
+                  <div class="w-1/2 projection-btn" data-view="top">
+                    <img src="assets/icons/俯视图.svg" alt="俯视" width="36" height="36" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 灯光设置 -->
+        <div class="lighting-settings">
+          <div class="lighting-settings-title">灯光设置</div>
+          <div class="lighting-settings-content">
+            <div class="lighting-settings-item">
+              <div class="lighting-settings-item-title">角度</div>
+              <div class="item__content angle">
+                <div class="angle-outer">
+                  <div class="angle-sphere" id="angleSphere">
+                  </div>
+                </div>
+                <div id="shaderRound" class="shader-round" style="transform:rotate(0deg); cursor:grab;"></div>
+              </div>
+            </div>
+            <div class="lighting-settings-item">
+              <div class="lighting-settings-item-title">射灯强度</div>
+              <div class="slider-container">
+                <input type="range" id="lightSlider" min="0" max="20" step="1" value="2" />
+                <input type="number" id="lightNumber" min="0" max="20" step="1" value="2" />
+              </div>
+            </div>
+            <div class="lighting-settings-item">
+              <div class="lighting-settings-item-title">平面光强度</div>
+              <div class="slider-container">
+                <input type="range" id="ambientSlider" min="0" max="20" step="1" value="0" />
+                <input type="number" id="ambientNumber" min="0" max="20" step="1" value="0" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 底部面板 -->
+    <div id="bottomPanel" class="bottom-panel">
+      <div class="flex gap-2">
+        <div id="textureBar" class="texture-bar">
+          <div class="texture-icon-container is-active" data-texture="贴图" data-tooltip="贴图">
+            <img class="texture-icon" src="assets/icons/贴图.svg" alt="贴图" />
+          </div>
+          <div class="texture-icon-container" data-texture="白膜" data-tooltip="白膜">
+            <img class="texture-icon" src="assets/icons/白模.svg" alt="白膜" />
+          </div>
+          <div class="texture-icon-container" data-texture="法线" data-tooltip="法线">
+            <img class="texture-icon" src="assets/icons/法线.svg" alt="法线" />
+          </div>
+          <div class="texture-icon-container" data-texture="反照" data-tooltip="反射">
+            <img class="texture-icon" src="assets/icons/反照.svg" alt="反照" />
+          </div>
+        </div>
+        <div class="upload-wrapper" style="cursor: pointer !important;">
+          <input type="file" id="fileInput" accept=".glb" />
+          <div class="upload-button" id="uploadBtn">
+            <span id="uploadLabel">上传</span>
+          </div>
+        </div>
+        <div class="upload-wrapper">
+          <div class="upload-button" id="screenshotBtn">
+            <span>截图</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+
+</html>
