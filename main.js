@@ -453,10 +453,8 @@ function updateLightDirection(light) {
   const target = light || directionalLight;
   if (!target) return;
 
-  const orbit = modelViewer.getCameraOrbit();
-  const camTheta = orbit.theta;
-  const rad = angle * (Math.PI / 180) + camTheta +Math.PI;
-  const x = Math.sin(rad), z = Math.cos(rad), y = 0.5;
+  const rad = (angle - 90) * (Math.PI / 180);
+  const x = Math.cos(rad), z = Math.sin(rad), y = 0.5;
   target.position.set(x * 10, y * 10, z * 10);
   target.target.position.set(0, 0, 0);
   target.target.updateMatrixWorld();
@@ -537,7 +535,7 @@ function onAngleDragEnd() { isDragging = false; shaderRound.style.cursor = 'grab
 function applyAngle() {
   shaderRound.style.transform = `rotate(${angle}deg)`;
   shaderRound.style.cursor = isDragging ? 'grabbing' : 'grab';
-  angleSphere.style.transform = `rotate(${angle}deg)`;
+  angleSphere.style.transform = `rotate(${angle - 90}deg)`;
   updateLightDirection();
 }
 
@@ -628,7 +626,7 @@ async function loadModelFile(file) {
   uploadLabel.textContent = '上传中...';
   uploadBtn.classList.add('disabled');
 
-  cleanupResources();
+  resetPage();
 
   currentFileName = file.name;
   const fp = fileFingerprint(file);
@@ -683,7 +681,6 @@ modelViewer.addEventListener('camera-change', (e) => {
     presetView = 'none';
     document.querySelectorAll('[data-view]').forEach(btn => btn.classList.remove('is-active'));
   }
-  if (directionalLight) updateLightDirection();
 });
 
 
@@ -736,10 +733,12 @@ function resetPage() {
   lightSlider.value = 2; lightNumber.value = 2;
   ambientSlider.value = 0; ambientNumber.value = 0;
   shaderRound.style.transform = 'rotate(0deg)';
-  angleSphere.style.transform = 'rotate(0deg)';
+  angleSphere.style.transform = 'rotate(-90deg)';
   document.querySelectorAll('[data-projection]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.projection === 'perspective'));
   document.querySelectorAll('[data-view]').forEach(btn => btn.classList.toggle('is-active', btn.dataset.view === 'front'));
   refreshTextureButtons();
+  updateRangeTrack(lightSlider);
+  updateRangeTrack(ambientSlider);
 }
 
 // ======================== Panel enable/disable ========================
