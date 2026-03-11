@@ -455,7 +455,7 @@ function updateLightDirection(light) {
 
   const orbit = modelViewer.getCameraOrbit();
   const camTheta = orbit.theta;
-  const rad = angle * (Math.PI / 180) + camTheta;
+  const rad = angle * (Math.PI / 180) + camTheta +Math.PI;
   const x = Math.sin(rad), z = Math.cos(rad), y = 0.5;
   target.position.set(x * 10, y * 10, z * 10);
   target.target.position.set(0, 0, 0);
