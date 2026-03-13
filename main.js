@@ -3,7 +3,10 @@ import { GLBMaterialExtractor } from './lib/model.js';
 
 // ======================== DOM refs ========================
 const modelViewer = document.getElementById('modelViewer');
+const app = document.getElementById('app');
 const loadingEl = document.getElementById('loadingProgress');
+const emptyState = document.getElementById('emptyState');
+const emptyDropzone = document.getElementById('emptyDropzone');
 const progressText = document.getElementById('progressText');
 const triangleCountEl = document.getElementById('triangleCount');
 const leftPanel = document.getElementById('leftPanel');
@@ -606,6 +609,10 @@ async function getModelMaterials() {
 // ======================== Upload ========================
 function handleFileSelect(e) {
   const file = e.target.files && e.target.files[0];
+  handleModelFile(file);
+}
+
+function handleModelFile(file) {
   if (!file) return;
   if (!file.name.toLowerCase().endsWith('.glb')) {
     showToast('仅支持 GLB 格式');
@@ -627,6 +634,7 @@ async function loadModelFile(file) {
   uploadBtn.classList.add('disabled');
 
   resetPage();
+  setEmptyStateVisible(false);
 
   currentFileName = file.name;
   const fp = fileFingerprint(file);
@@ -657,9 +665,11 @@ modelViewer.addEventListener('progress', (e) => {
   if (currentProgress > 0 && currentProgress < 100) {
     loadingEl.classList.remove('hidden');
     modelViewer.style.opacity = '0';
+    setEmptyStateVisible(false);
   } else if (currentProgress >= 100) {
     loadingEl.classList.add('hidden');
     modelViewer.style.opacity = '1';
+    setEmptyStateVisible(false);
   }
 });
 
@@ -667,6 +677,7 @@ modelViewer.addEventListener('load', async () => {
   loadingEl.classList.add('hidden');
   modelViewer.style.opacity = '1';
   currentProgress = 100;
+  setEmptyStateVisible(false);
   enablePanels();
   await initModelViewerAfterLoad();
 });
@@ -674,6 +685,7 @@ modelViewer.addEventListener('load', async () => {
 modelViewer.addEventListener('error', () => {
   showToast('模型加载失败，请重试');
   loadingEl.classList.add('hidden');
+  setEmptyStateVisible(true);
 });
 
 modelViewer.addEventListener('camera-change', (e) => {
@@ -739,6 +751,7 @@ function resetPage() {
   refreshTextureButtons();
   updateRangeTrack(lightSlider);
   updateRangeTrack(ambientSlider);
+  setEmptyStateVisible(true);
 }
 
 // ======================== Panel enable/disable ========================
@@ -747,6 +760,11 @@ function enablePanels() {
 }
 function disablePanels() {
   [leftPanel, rightPanel].forEach(p => p.classList.add('pointer-events-none'));
+}
+
+function setEmptyStateVisible(visible) {
+  if (!emptyState) return;
+  emptyState.classList.toggle('hidden', !visible);
 }
 
 // ======================== Toast ========================
@@ -893,3 +911,39 @@ function updateRangeTrack(slider) {
   s.addEventListener('input', () => updateRangeTrack(s));
   updateRangeTrack(s);
 });
+
+if (emptyDropzone) {
+  emptyDropzone.addEventListener('click', () => fileInput.click());
+  emptyDropzone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput.click();
+    }
+  });
+
+  emptyDropzone.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    emptyDropzone.classList.add('is-dragover');
+  });
+  emptyDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    emptyDropzone.classList.add('is-dragover');
+  });
+  emptyDropzone.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    emptyDropzone.classList.remove('is-dragover');
+  });
+  emptyDropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    emptyDropzone.classList.remove('is-dragover');
+    const file = e.dataTransfer?.files?.[0];
+    handleModelFile(file);
+  });
+}
+
+if (app) {
+  app.addEventListener('dragover', (e) => e.preventDefault());
+  app.addEventListener('drop', (e) => e.preventDefault());
+}
+
+setEmptyStateVisible(true);

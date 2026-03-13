@@ -49,6 +49,61 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   display: flex; align-items: center; justify-content: center;
 }
 
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.empty-dropzone {
+  pointer-events: auto;
+  width: min(560px, calc(100vw - 48px));
+  min-height: 240px;
+  padding: 28px 24px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.25);
+  background: rgba(20, 20, 20, 0.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.empty-dropzone:hover,
+.empty-dropzone.is-dragover,
+.empty-dropzone:focus-visible {
+  border-color: #745ef5;
+  background: rgba(20, 20, 20, 0.62);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.empty-title {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.empty-subtitle {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+}
+
+.empty-format-tip {
+  margin-top: 6px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+}
+
 .spinner {
   width: 32px; height: 32px;
   border: 3px solid rgba(255, 255, 255, 0.15);
@@ -288,3 +343,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .right-panel-main::-webkit-scrollbar { width: 4px; }
 .right-panel-main::-webkit-scrollbar-track { background: transparent; }
 .right-panel-main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+@media (max-width: 768px) {
+  .empty-dropzone {
+    min-height: 192px;
+    padding: 24px 16px;
+  }
+  .empty-title {
+    font-size: 20px;
+  }
+}
